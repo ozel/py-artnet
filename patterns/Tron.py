@@ -7,7 +7,7 @@ import pygame
 
 
 class TronPlayer(object):
-    def __init__(self, color, game, pos=(5, 5)):
+    def __init__(self, color, game, pos=(0, 0)):
         self.game = game
         self.color = color
         self.pos = pos
@@ -17,7 +17,7 @@ class TronPlayer(object):
         # put our head on our body
         self.body.append(self.pos)
         self.moveKeys = [K_LEFT, K_RIGHT, K_UP, K_DOWN]
-        self.debug = False
+        self.debug = True
 
     def inputHandling(self, event):
         pass
@@ -67,8 +67,8 @@ class OldTron(object):
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
         self.color = BLUE
-        x = random.randint(1, matrix_width - 1)
-        y = random.randint(1, matrix_height - 1)
+        x = 0 #random.randint(1, matrix_width - 1)
+        y = 0 #3random.randint(1, matrix_height - 1)
         self.pos = x, y
         self.speed = 1
         self.deltax, self.deltay = 0, 0
@@ -81,9 +81,23 @@ class OldTron(object):
         pygame.init()
         self.window = pygame.display.set_mode((80, 60))
         self.debug = False
+        pygame.key.set_repeat(1, 1)
 
     def inputHandling(self):
-        pass
+        keys_pressed = pygame.key.get_pressed()
+
+        if keys_pressed[pygame.K_UP]:
+            self.deltax = 1
+            self.deltay = 0
+        if keys_pressed[pygame.K_DOWN]:
+            self.deltax = -1
+            self.deltay = 0
+        if keys_pressed[pygame.K_LEFT]:
+            self.deltax = 0
+            self.deltay = -1
+        if keys_pressed[pygame.K_RIGHT]:
+            self.deltax = 0
+            self.deltay = 1
 
     def update(self):
         x, y = self.pos

@@ -3,8 +3,12 @@ from patterns.Patterns import *
 
 local_host = "localhost"
 dest = "pixelmatrix"
+mc = '2.44.97.50'
 
 TARGETS = {
+    #mc : OldTron(),
+    mc : LHC(),
+    #mc : PlasmaSecond(),
     # 'lightpaper': Visualizer(),
     # 'lightpaper': RandomLife(),
     # 'lightpaper': BlueLife(),
@@ -33,7 +37,7 @@ TARGETS = {
     # local_host: DisplayPng(),
 
     # dest: PlasmaFirst(),
-    local_host: PlasmaSecond(),
+    #local_host: PlasmaSecond(),
     # michiel_laptop: PlasmaSecond(),
     # local_host: PlasmaThird(),
 

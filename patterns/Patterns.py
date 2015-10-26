@@ -28,7 +28,7 @@ from RainPattern import *
 from PixelLife import *
 from Plasma import *
 from sven import *
-
+from LHC import * 
 
 # uses pygame for testing.
 try:

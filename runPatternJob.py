@@ -6,7 +6,7 @@ import imp
 import os
 import time
 import collections
-
+from matrix import matrix_width, matrix_height
 
 def get_trace():
     exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -156,11 +156,20 @@ def sendout(args):
                 sendout.data = data
                 # send it out over the network.
                 if not (args.netSilent == "enabled"):
-                    try:
-                        sock.sendto(buildPacket(0, data), (t, UDP_PORT))
-                    except Exception:
-                        print("no good ip dest found: %s" % (t))
-                        sys.exit(0)
+                    #try:
+                        if (args.mapy == "enabled"): 
+                            for universe in range(0,matrix_height-1):
+                                sock.sendto(buildPacket(universe, data[matrix_width*universe*3:(matrix_width*universe)+(matrix_width*3)]), (t, UDP_PORT))    
+                        else:
+                            #sock.sendto(buildPacket(0, data), (t, UDP_PORT))
+                            #sock.sendto(buildPacket(1, data), (t, UDP_PORT))
+                            #sock.sendto(buildPacket(2, data), (t, UDP_PORT))
+                            sock.sendto(buildPacket(3, data), (t, UDP_PORT))
+                            #sock.sendto(buildPacket(4, data), (t, UDP_PORT))
+                            #sock.sendto(buildPacket(5, data), (t, UDP_PORT))
+                    #except Exception:
+                    #    print("no good ip dest found: %s" % (t))
+                    #    sys.exit(0)
     # matrix sim needs this because i am to lazy to press the x button.
     except KeyboardInterrupt:
         signal_handler(None, None)
