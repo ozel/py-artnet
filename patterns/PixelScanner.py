@@ -25,30 +25,35 @@ class PixelScanner(object):
         pygame.init()
         self.window = pygame.display.set_mode((80, 60))
         self.debug = False
-        pygame.key.set_repeat(1000, 1000)
+        pygame.key.set_repeat(500, 1)
 
     def inputHandling(self):
-        keys_pressed = pygame.key.get_pressed()
+        
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    self.deltax = 0
+                    self.deltay = 1
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    self.deltax = 0
+                    self.deltay = -1
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    self.deltax = -1
+                    self.deltay = 0
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    self.deltax = 1
+                    self.deltay = 0
+                if event.key == pygame.K_e:
+                    self.deltax = 5
+                    self.deltay = 0            
+                if event.key == pygame.K_q:
+                    self.deltax = -5
+                    self.deltay = 0
 
-        if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
-            self.deltax = 0
-            self.deltay = 1
-        if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
-            self.deltax = 0
-            self.deltay = -1
-        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]:
-            self.deltax = -1
-            self.deltay = 0
-        if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
-            self.deltax = 1
-            self.deltay = 0
-
-        if keys_pressed[pygame.K_e]:
-            self.deltax = 5
-            self.deltay = 0            
-        if keys_pressed[pygame.K_q]:
-            self.deltax = -5
-            self.deltay = 0
+                if event.key == pygame.K_SPACE:
+                    print(self.pos)
+                
+        
 
     def update(self):
         x, y = self.pos

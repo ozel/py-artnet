@@ -6,8 +6,8 @@ dest = "pixelmatrix"
 mc = '2.44.97.50'
 
 TARGETS = {
-    mc : OldTron(),
-    #mc : PixelScanner(),
+    #mc : OldTron(),
+    mc : PixelScanner(),
     #mc : LHC(),
     #mc : PlasmaSecond(),
     # 'lightpaper': Visualizer(),
