@@ -52,8 +52,6 @@ class MatrixScreen(object):
         # reverse order because else the display is flipped.
         heightrange = range(0, self.window_height, pixelsize)[::-1]
 
-        # due to how the ledmatrix is displayed x, y are filled as is the
-        # window_width/height thing a bit above here.
         for y in heightrange:
             for x in widthrange:
                 pos = (x, y)
