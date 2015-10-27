@@ -14,7 +14,7 @@ def buildPacket(universe, dmxdata):
     data += chr(int(size / 256))
     data += chr(int(size % 256))
     for (r, g, b) in dmxdata:
-        data += chr(r)
+        data += chr(b) #was red
         data += chr(g)
-        data += chr(b)
+        data += chr(r) #was blue
     return data

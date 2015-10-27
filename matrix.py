@@ -3,8 +3,8 @@ matrix dimensions and color order for simulator.
 and conversion function(s)
 """
 
-matrix_height = 170
-matrix_width = 5
+matrix_height = 5
+matrix_width = 170
 
 # matrix_height = 80
 # matrix_width = 7

@@ -6,63 +6,7 @@ from pygame.locals import *
 import pygame
 
 
-class TronPlayer(object):
-    def __init__(self, color, game, pos=(0, 0)):
-        self.game = game
-        self.color = color
-        self.pos = pos
-        self.speed = 1
-        self.deltax, self.deltay = 0, 0
-        self.body = []
-        # put our head on our body
-        self.body.append(self.pos)
-        self.moveKeys = [K_LEFT, K_RIGHT, K_UP, K_DOWN]
-        self.debug = True
-
-    def inputHandling(self, event):
-        pass
-
-    def bindKey(self, key, action):
-        self.moveKeys[action] = key
-
-    def update(self, other):
-        x, y = self.pos
-        # update position
-        x += self.deltax
-        y += self.deltay
-        # if tail goes offscreenit appears on the other side.
-        if x >= matrix_width:
-            x = 0
-            self.pos = x, y
-        elif x < 0:
-            x = matrix_width - 1
-            self.pos = x, y
-        elif y >= matrix_height:
-            y = 0
-            self.pos = x, y
-        elif y < 0:
-            y = matrix_height - 1
-            self.pos = x, y
-        else:
-            self.pos = x, y
-        if self.debug:
-            print(self.deltax, self.deltay)
-            print(x, y)
-
-    def draw(self):
-        for x, y in self.body:
-            self.game.graphics.drawPixel(x, y, self.color)
-
-
-class Tron(object):
-    def __init__(self):
-        self.graphics = Graphics(matrix_width, matrix_height)
-
-    def generate(self):
-        return self.graphics.getSurface()
-
-
-class OldTron(object):
+class PixelScanner(object):
     # version before creating players that handle processing on thier own.
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
@@ -75,28 +19,35 @@ class OldTron(object):
         self.body = []
         # add our head to our body :)
         self.body.append(self.pos)
-        self.player1 = TronPlayer(BLUE, self)
-        self.player1.update(self)
-        self.player1.draw()
+        # self.player1 = TronPlayer(BLUE, self)
+        # self.player1.update(self)
+        # self.player1.draw()
         pygame.init()
         self.window = pygame.display.set_mode((80, 60))
         self.debug = False
-        pygame.key.set_repeat(1, 1)
+        pygame.key.set_repeat(1000, 1000)
 
     def inputHandling(self):
         keys_pressed = pygame.key.get_pressed()
 
-        if keys_pressed[pygame.K_UP]:
+        if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
             self.deltax = 0
             self.deltay = 1
-        if keys_pressed[pygame.K_DOWN]:
+        if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
             self.deltax = 0
             self.deltay = -1
-        if keys_pressed[pygame.K_LEFT]:
+        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]:
             self.deltax = -1
             self.deltay = 0
-        if keys_pressed[pygame.K_RIGHT]:
+        if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
             self.deltax = 1
+            self.deltay = 0
+
+        if keys_pressed[pygame.K_e]:
+            self.deltax = 5
+            self.deltay = 0            
+        if keys_pressed[pygame.K_q]:
+            self.deltax = -5
             self.deltay = 0
 
     def update(self):
@@ -104,6 +55,7 @@ class OldTron(object):
         # update position
         x += self.deltax
         y += self.deltay
+
         # if the tail goes offscreen it appears on the other side.
         if x >= matrix_width:
             x = 0
@@ -133,8 +85,9 @@ class OldTron(object):
         # add current point to tail
         # only if we moved though
         if self.deltax or self.deltay:
-            self.body.append(self.pos)
-
+            self.body[0] = self.pos
+        self.deltay = 0
+        self.deltax = 0
     def draw(self):
         for x, y in self.body:
             self.graphics.drawPixel(x, y, self.color)

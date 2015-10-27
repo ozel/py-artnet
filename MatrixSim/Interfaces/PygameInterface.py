@@ -27,7 +27,7 @@ class PygameInterface(Interface):
                 lctrlpressed = (mods & key_mod) == key_mod
                 if event.key == pygame.K_c and lctrlpressed:
                     raise KeyboardInterrupt
-                elif event.key in (pygame.K_q, pygame.K_ESCAPE):
+                elif event.key == pygame.K_ESCAPE:
                     raise KeyboardInterrupt
 
             # check if the mouse pointer is on/in the window.

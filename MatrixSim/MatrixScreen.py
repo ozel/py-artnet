@@ -43,8 +43,8 @@ class MatrixScreen(object):
 
         self.pixels = []
 
-        self.window_width = height * pixelsize
-        self.window_height = width * pixelsize
+        self.window_width = width * pixelsize
+        self.window_height = height * pixelsize
 
         self.interface.setcaption("artnet matrix simulator.")
 
@@ -54,8 +54,8 @@ class MatrixScreen(object):
 
         # due to how the ledmatrix is displayed x, y are filled as is the
         # window_width/height thing a bit above here.
-        for x in widthrange:
-            for y in heightrange:
+        for y in heightrange:
+            for x in widthrange:
                 pos = (x, y)
                 color = BLUE
                 pixel = Pixel(pos, pixelsize, color)

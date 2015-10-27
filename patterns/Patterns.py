@@ -29,6 +29,8 @@ from PixelLife import *
 from Plasma import *
 from sven import *
 from LHC import * 
+from PixelScanner import * 
+
 
 # uses pygame for testing.
 try:
