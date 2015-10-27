@@ -8,6 +8,9 @@ import time
 import collections
 from matrix import matrix_width, matrix_height
 
+loopPatterns = True
+
+
 def get_trace():
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -100,7 +103,11 @@ def load_targets(configfile):
     return config.TARGETS
 
 
-def signal_handler(signal, frame):
+def signal_handler(error, frame):
+    # global loopPatterns
+    # if error.code == 2:
+    #     loopPatterns = False
+    # else:
     print("\nExiting closing connections.")
     sock.close()
     sys.exit(0)
@@ -173,8 +180,8 @@ def sendout(args):
     # matrix sim needs this because i am to lazy to press the x button.
     except KeyboardInterrupt:
         signal_handler(None, None)
-    except SystemExit:
-        signal_handler(None, None)
+    except SystemExit as error:
+        signal_handler(error, None)
 sendout.data = []
 
 
@@ -244,15 +251,18 @@ if __name__ == "__main__":
             fps = 1. / args.fps
 
         previousTime = time.time()
-
         while(True):
-            # send patterns out in a timed fasion. if args.fps != 0
-            if args.fps > 0:
-                sendout(args)
-                # TODO: figure out how to dynamicly
-                # adjust time as to have a fixed fps.
-                time.sleep(fps)
-            # else send everything out as fast as possible
-            else:
-                sendout(args)
+            #os.system('read -s -n 1 -p "Press any key to continue..."')
+            loopPatterns = True
+            while(loopPatterns):
+                # send patterns out in a timed fasion. if args.fps != 0
+                if args.fps > 0:
+                    sendout(args)
+                    # TODO: figure out how to dynamicly
+                    # adjust time as to have a fixed fps.
+                    time.sleep(fps)
+                # else send everything out as fast as possible
+                else:
+                    sendout(args)
+            time.sleep(0.5)
         signal_handler(None, None)

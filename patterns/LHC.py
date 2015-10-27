@@ -6,6 +6,9 @@ from matrix import matrix_width, matrix_height
 from Tools.Graphics import *
 import math
 import random
+import sys
+import os
+import serial
 
 BOT_BEGIN = 0
 BOT_END = 19
@@ -107,7 +110,10 @@ class Bunch():
 class LHC(object):
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
-        self.state = 0  #global state counter
+        self.serialPort = serial.Serial('/dev/cu.usbmodem14131',115200,timeout=None)
+        self.reset()
+
+    def reset(self):
         self.bot_pos = BOT_BEGIN
         self.duo_pos = DUO_BEGIN
         self.lin_pos = LIN_BEGIN
@@ -125,6 +131,9 @@ class LHC(object):
         self.lin_bunches = list()
         self.sps_bunches = list()
         self.lhc_bunches = list()
+        self.restart = True
+        self.serialPort.flushInput()
+
 
 
     def animateSrtripe(self,pattern, x, min_x, max_x, acc, y):
@@ -211,9 +220,9 @@ class LHC(object):
                 else:
                     self.sps_done = True
                     new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,2)
-                    self.sps_bunches.append(new_bunch)
+                    self.lhc_bunches.append(new_bunch)
                     new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,3)
-                    self.sps_bunches.append(new_bunch)
+                    self.lhc_bunches.append(new_bunch)
                     del_bunches.append(index)
 
             #print ("before bunches", len(self.bunches))                
@@ -239,7 +248,7 @@ class LHC(object):
 
     def updateLHC(self,lr):
         global global_i
-        if self.lhc_done : 
+        if self.sps_done : 
             del_bunches = list()
             for index, bnch in enumerate(self.lhc_bunches):
                 if bnch.isAlive():
@@ -253,11 +262,24 @@ class LHC(object):
             for index in sorted(del_bunches, reverse=True):
                 del self.lhc_bunches[index]
             
-            if self.debug:
-                print(self.lhc_pos)  
+            print(self.lhc_pos)  
+            if self.lhc_pos > 1* (LHC_END-LHC_BEGIN) :
+                #sys.exit(2)
+                return 0
+            else:
+                self.lhc_pos += 1
+        return 1
+            
 
     def generate(self):
         global global_i
+        if self.restart:
+            global_i = 0
+            self.reset()
+            print("Press any key to continue...")
+            self.serialPort.read(1)
+            #os.system('read -s -n 1 -p "Press any key to continue..."')
+            self.restart = False
         self.graphics.fill(BLACK)
         # self.bot_done = True
         # self.duo_done = True
@@ -266,15 +288,10 @@ class LHC(object):
         self.updateLINAC(lin_pat)
         self.updateSPS(sps_pat)
         self.updateLHC(0)
-        self.updateLHC(1)
+        if not self.updateLHC(1):
+            # reset
+            print('LHC LED strip animation ended')
+            self.graphics.fill(BLACK)
+            self.restart = True
         global_i += 1
-        
-        
-
-        # if self.state >= 30:
-        #     self.state = 0
-        #     self.bot_pos = 0
-        #     self.duo_pos = DUO_BEGIN
-        #     self.lin_pos = 0
-
         return self.graphics.getSurface()
