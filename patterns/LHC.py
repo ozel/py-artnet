@@ -9,6 +9,7 @@ import random
 import sys
 import os
 import serial
+import liblo #for OSC messaging
 
 BOT_BEGIN = 0
 BOT_END = 99
@@ -110,7 +111,11 @@ class Bunch():
 class LHC(object):
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
-        self.serialPort = serial.Serial('/dev/cu.usbmodem1411',115200,timeout=None)
+        try:
+            self.serialPort = serial.Serial('/dev/cu.usbmodem1411',115200,timeout=None)
+        except:
+            print('serial port not valid')
+            self.serialPort = None
         self.reset()
 
     def reset(self):
@@ -132,7 +137,10 @@ class LHC(object):
         self.sps_bunches = list()
         self.lhc_bunches = list()
         self.restart = True
-        self.serialPort.flushInput()
+        if self.serialPort:
+            self.serialPort.flushInput()
+        self.osc_target = liblo.Address("mc-showcontrol",7777)
+
 
 
 
@@ -192,6 +200,7 @@ class LHC(object):
             #if global_i == 0:
                 new_bunch = Bunch(self.graphics, pattern, LIN_BEGIN,LIN_END,1.2,0)
                 self.lin_bunches.append(new_bunch)
+                liblo.send(self.osc_target, "/collision", ('T',1))
                 #print('NEW BUNCH', global_i % 10)
 
             # self.lin_pos += 1
@@ -277,7 +286,8 @@ class LHC(object):
             global_i = 0
             self.reset()
             print("Press any key to continue...")
-            #self.serialPort.read(1)
+            #if self.serialPort:
+                #self.serialPort.read(1)
             #os.system('read -s -n 1')
             self.restart = False
         self.graphics.fill(BLACK)
