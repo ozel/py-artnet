@@ -11,16 +11,16 @@ import os
 import serial
 import liblo #for OSC messaging
 
-BOT_BEGIN = 0
-BOT_END = 99
-DUO_BEGIN = 100
-DUO_END = 170
+BOT_BEGIN = 4
+BOT_END   = 37
+DUO_BEGIN = 38
+DUO_END   = 68
 LIN_BEGIN = 0
-LIN_END = 100
-SPS_BEGIN = 0
-SPS_END = 170
-LHC_BEGIN = 0
-LHC_END = 170
+LIN_END   = 168
+SPS_BEGIN = 13
+SPS_END   = 48
+LHC_BEGIN = 4
+LHC_END   = 167
 
 bot_pat = [(0,0,127),BLUE,(127,0,0),RED]
 duo_pat = [BLACK,BLACK,(107,0,0),RED,(127,0,0)]
@@ -88,11 +88,12 @@ class Bunch():
             sign = -1
          
         #for color in self.pattern:
-        #color = self.pattern[(int(-global_i)%len(self.pattern))]
-        self.graphics.drawPixel(offset-(sign*self.x), self.y, self.pattern[1])
-        if self.mode >= 2 or (self.mode == 1 and self.x > 20):
-            self.graphics.drawPixel(offset-(sign*self.x-1),self.y, self.pattern[2])
-            self.graphics.drawPixel(offset-(sign*self.x+1),self.y, self.pattern[0])
+        color = self.pattern[(int(-global_i)%len(self.pattern))]
+        self.graphics.drawPixel(offset-(sign*self.x), self.y, color)
+        #self.graphics.drawPixel(offset-(sign*self.x), self.y, self.pattern[1])
+        #if self.mode >= 2 or (self.mode == 1 and self.x > SPS_END):
+        #    self.graphics.drawPixel(offset-(sign*self.x-1),self.y, self.pattern[2])
+        #    self.graphics.drawPixel(offset-(sign*self.x+1),self.y, self.pattern[0])
 
         
         # if self.x in list([((x-cur_x)*(x-cur_x)) for x in range(self.min_x, self.max_x)]):
@@ -187,6 +188,8 @@ class LHC(object):
                     self.lin_done = True
                     new_bunch = Bunch(self.graphics, sps_pat, SPS_BEGIN,SPS_END,1,4,2)
                     self.sps_bunches.append(new_bunch)
+                    new_bunch = Bunch(self.graphics, sps_pat, SPS_BEGIN,SPS_END,1,4,2)
+                    self.sps_bunches.append(new_bunch)
                     del_bunches.append(index)
 
             #print ("before bunches", len(self.bunches))                
@@ -196,7 +199,7 @@ class LHC(object):
             
             #print ("after bunches", len(self.bunches))
 
-            if  global_i % 10 == 0:
+            if  global_i % 8 == 0:
             #if global_i == 0:
                 new_bunch = Bunch(self.graphics, pattern, LIN_BEGIN,LIN_END,1.2,0)
                 self.lin_bunches.append(new_bunch)
@@ -228,6 +231,10 @@ class LHC(object):
                     bnch.travel()
                 else:
                     self.sps_done = True
+                    new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,2)
+                    self.lhc_bunches.append(new_bunch)
+                    new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,3)
+                    self.lhc_bunches.append(new_bunch)
                     new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,2)
                     self.lhc_bunches.append(new_bunch)
                     new_bunch = Bunch(self.graphics, lhc_pat, LHC_BEGIN,LHC_END,1,3,3)
@@ -296,8 +303,8 @@ class LHC(object):
         self.updateBottle()
         self.updateDuoplasmatron()
         self.updateLINAC(lin_pat)
-        self.updateSPS(sps_pat)
-        self.updateLHC(0)
+        #self.updateSPS(sps_pat)
+        #self.updateLHC(0)
         if not self.updateLHC(1):
             # reset
             print('LHC LED strip animation ended')

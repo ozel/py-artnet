@@ -1,4 +1,4 @@
-from Tools.Graphics import Graphics, BLUE, BLACK
+from Tools.Graphics import Graphics, BLUE, BLACK, WHITE
 from matrix import matrix_width, matrix_height
 import random
 
@@ -10,7 +10,7 @@ class PixelScanner(object):
     # version before creating players that handle processing on thier own.
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
-        self.color = BLUE
+        self.color = WHITE
         x = 0 #random.randint(1, matrix_width - 1)
         y = 0 #3random.randint(1, matrix_height - 1)
         self.pos = x, y

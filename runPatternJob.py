@@ -164,9 +164,11 @@ def sendout(args):
                 # send it out over the network.
                 if not (args.netSilent == "enabled"):
                     try:
-                        if (args.mapy == "enabled"): 
-                            for universe in range(0,matrix_height-1):
-                                sock.sendto(buildPacket(universe, data[matrix_width*universe:(matrix_width*universe)+(matrix_width)]), (t, UDP_PORT))    
+                        if (args.mapy == "enabled"):
+
+                            for universe in range(0,matrix_height):
+                                #print('send to universe:', universe)
+                                sock.sendto(buildPacket(universe, data[matrix_width*universe:(matrix_width*(universe+1))]), (t, UDP_PORT))    
                         else:
                             #sock.sendto(buildPacket(0, data), (t, UDP_PORT))
                             #sock.sendto(buildPacket(1, data), (t, UDP_PORT))
