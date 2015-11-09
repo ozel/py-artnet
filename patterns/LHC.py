@@ -11,6 +11,8 @@ import os
 import serial
 import liblo #for OSC messaging
 import random
+import numpy
+from operator import sub
 
 CW = 0
 CCW = 1
@@ -36,14 +38,12 @@ LHC_BEGIN = 4
 
 
 
-OFF= (0,0,0)
-
 bot_pat = [(0,0,127),BLUE,(127,0,0),RED]
 duo_pat = [BLACK,BLACK,(107,0,0),RED,(127,0,0)]
 lin_pat = [(127,0,0),RED,(127,0,0)]
 #sps_pat = [(100,100,100),WHITE,(100,100,100)]
 sps_pat = [(30,30,0),(30,30,0),(30,30,0)]
-#sps_pat = [OFF,OFF,OFF]
+
 lhc_pat = [(90,90,0),YELLOW,(90,90,0)]
 
 lhc_pat_cw = [YELLOW,(30,30,0),(10,10,0)]
@@ -79,6 +79,7 @@ g_atlas_col = 0
 g_alice_col = 0
 g_cms_col = 0
 g_lhcb_col = 0
+g_last_collision = 0
 
 def repeat(times, func, *args, **kwargs):
     for _ in xrange(times):
@@ -178,39 +179,13 @@ class Bunch():
                         self.graphics.drawPixel(x-self.section_base_x+min_x+1,self.y, self.pattern[0])
             self.section_base_x += range_x
 
-    def checkCollision(self, bunches, other_dir):
-        global g_atlas_col
-        global g_alice_col
-        global g_cms_col
-        global g_lhcb_col
 
-        collision = False
-        for b2 in bunches[other_dir]:
-                if self.x in range(b2.x-2,b2.x+2) and self.y == b2.y:
-                    if self.x in ATLASr and g_atlas_col < 4 :
-                        g_atlas_col +=1 
-                        return True
-                    elif self.x in ALICEr and g_alice_col < 4:
-                        g_alice_col +=1
-                        return True
-                    elif self.x in CMSr and g_cms_col < 4: 
-                        g_cms_col +=1
-                        return True
-                    elif self.x in LHCbr and g_lhcb_col < 4:
-                        g_lhcb_col +=1
-                        return True
-        return collision
-
-    def collide(self):
-        self.graphics.drawPixel(self.x-1,self.y,WHITE)
-        self.graphics.drawPixel(self.x  ,self.y,WHITE)
-        self.graphics.drawPixel(self.x+1,self.y,WHITE)
 
 class LHC(object):
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
         try:
-            self.serialPort = serial.Serial('/dev/cu.usbmodem1411',115200,timeout=None)
+            self.serialPort = serial.Serial('/dev/cu.usbmodem1421',115200,timeout=None)
         except:
             print('serial port not valid')
             self.serialPort = None
@@ -245,6 +220,7 @@ class LHC(object):
         self.tfl_bunches = list()
         self.tfr_bunches = list()
         self.lhc_bunches = [[] for k in range(2)]
+        self.collisions = list()
 
 
         self.restart = True
@@ -252,9 +228,88 @@ class LHC(object):
             self.serialPort.flushInput()
         self.osc_target = liblo.Address("mc-showcontrol1",7777)
 
+    def checkCollision(self, b1x, b1y, other_dir):
+        global g_atlas_col
+        global g_alice_col
+        global g_cms_col
+        global g_lhcb_col
+        global g_last_collision
 
+        collision = False
+        if global_i > g_last_collision + 250:
+            timePassed = True  
+        else:
+            timePassed = False  
+        for b2 in self.lhc_bunches[other_dir]:
+                if b1x in range(b2.x-2,b2.x+2) and b1y == b2.y:
+                    if b1x in ATLASr and g_atlas_col < 1 and timePassed == True:
+                        g_atlas_col +=1 
+                        g_last_collision = global_i
+                        self.collisions.append([ATLAS, b1y, 100])
+                        return True
+                    elif b1x in ALICEr and g_alice_col < 1 and timePassed:
+                        g_alice_col +=1
+                        g_last_collision = global_i
+                        self.collisions.append([ALICE, b1y, 100])
+                        return True
+                    elif b1x in CMSr and g_cms_col < 1 and timePassed: 
+                        g_cms_col +=1
+                        g_last_collision = global_i
+                        self.collisions.append([CMS, b1y, 100])
+                        return True
+                    elif b1x in LHCbr and g_lhcb_col < 1 and timePassed:
+                        g_lhcb_col +=1
+                        g_last_collision = global_i
+                        self.collisions.append([LHCb, b1y, 100])
+                        return True
+        return collision
 
+    def updateCollisions(self):
+        global g_last_collision
+        global global_i
 
+        #col_pat=[[255,255,255], [50,50,50], [0,0,0], [255,255,255], [50,50,50],[255,0,0],[0,255,0],[0,0,255],[0,255,255]]
+        col_pat=[WHITE, (50,50,50), (0,0,0), (255,255,255), (50,50,50),(255,0,0),(0,255,0),(0,0,255),(0,255,255)]
+
+        # for testing
+        # self.collisions.append([ATLAS, 3, 100])
+        # g_last_collision = 1
+
+        if g_last_collision > 0:
+            del_collisions = list()
+
+            for index,collision in enumerate(self.collisions):
+                # if global_i%3 == 0:
+                #     color = WHITE
+                # elif global_i%3 == 1: 
+                #     color = (50,50,50)
+                # elif global_i%3 == 2: 
+                #     color = BLACK
+
+                color = col_pat[global_i%len(col_pat)]
+
+                # border = map(sub,color,(200,200,200))
+                # for i,col in enumerate(border):
+                #     if col < 0:
+                #         col = 1
+                #         border[i]=col
+                # border = tuple(border)
+
+                self.graphics.drawPixel(collision[0]-1,collision[1],color)
+                self.graphics.drawPixel(collision[0],collision[1],color)
+                self.graphics.drawPixel(collision[0]+1,collision[1],color)
+
+                # decrement life time counter
+                collision[2] -= 1
+            
+                if collision[2] < 0:
+                    del_collisions.append(index)
+
+            # cleanup
+            for index in sorted(del_collisions, reverse=True):
+                del self.collisions[index]    
+
+    
     def animateSrtripe(self,pattern, x, min_x, max_x, acc, y):
         global global_i
         
@@ -265,7 +320,7 @@ class LHC(object):
             if x < max_x and x < pixel:
                 color = BLACK
             else:
-                color = pattern[(pixel-global_i)%len(pattern)]
+                color = pattern[(pixel-(global_i/5))%len(pattern)]
             self.graphics.drawPixel(pixel, y, color)
 
     def updateBottle(self):
@@ -316,7 +371,7 @@ class LHC(object):
 
             if  global_i % 8 == 0: #accelerate protons in linac 
             #if global_i == 0:
-                new_bunch = Bunch(self.graphics, config, pattern,1.1)
+                new_bunch = Bunch(self.graphics, config, pattern,1.05)
                 self.lin_bunches.append(new_bunch)
                 #print('NEW BUNCH', global_i % 10)
 
@@ -342,7 +397,7 @@ class LHC(object):
                     bnch.draw()
                     bnch.travel()            
                     #print(bnch.x)         
-                    if self.sps_bcnt >= 12 and self.sps_bcnt < 3*18:
+                    if self.sps_bcnt >= 3*4 and self.sps_bcnt < 3*11:
                         if  global_i % 3 == 0:
                             if bnch.x == 20:
                                 self.sps_done = True
@@ -404,13 +459,13 @@ class LHC(object):
                 if bnch.cycles == 0:
                     #print('ALIVE')
                     bnch.mode = LONG
-                    if self.lhc_pos > 3 * 2 * LHC_SIZE and \
-                        (direction == CW and bnch.checkCollision(self.lhc_bunches, CCW) == True or \
-                        direction == CCW and bnch.checkCollision(self.lhc_bunches, CW) == True):
-                        print("collide", bnch.x)
-                        bnch.collide()
+                    if self.lhc_pos > 1 * 2 * LHC_SIZE and \
+                        ((direction == CW and self.checkCollision(bnch.x, bnch.y, CCW)) or \
+                        (direction == CCW and self.checkCollision(bnch.x, bnch.y, CW)) ) :
+                        print("collide", bnch.x, bnch.y)
                         #bnch.cycles += 1
                         del_bunches.append(index)
+                        #del_bunches.append(index-1)
                     else:
                         bnch.draw()    
                     bnch.travel()
@@ -439,6 +494,7 @@ class LHC(object):
         global g_alice_col
         global g_cms_col
         global g_lhcb_col
+        global g_last_collision
 
         if self.restart:
             global_i = 0
@@ -446,15 +502,18 @@ class LHC(object):
             g_alice_col = 0
             g_cms_col = 0
             g_lhcb_col = 0
+            g_last_collision = 0
             self.reset()
-            print("Press any key to continue...")
-            #if self.serialPort:
-                #self.serialPort.read(1)
+            print("Touch the bottle...")
+            if self.serialPort:
+                self.serialPort.flushInput()
+                self.serialPort.read(1)
+            #print("Press any key to continue...")
             #os.system('read -s -n 1')
             self.restart = False
         self.graphics.fill(BLACK)
-        self.bot_done = True
-        self.duo_done = True
+        # self.bot_done = True
+        # self.duo_done = True
         self.updateBottle()
         self.updateDuoplasmatron()
         self.updateLINAC(lin_conf, lin_pat)
@@ -463,6 +522,7 @@ class LHC(object):
         self.updateTF(lhc_conf, lhc_pat_cw, TFR)
         self.updateLHC(lhc_conf, lhc_pat_cw, CW)
         self.updateLHC(lhc_conf, lhc_pat_ccw, CCW)
+        self.updateCollisions()
         if self.lhc_done:
             try:
                 liblo.send(self.osc_target, "/collision", ('T',1))
