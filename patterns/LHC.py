@@ -226,7 +226,11 @@ class LHC(object):
         self.restart = True
         if self.serialPort:
             self.serialPort.flushInput()
-        self.osc_target = liblo.Address("mc-showcontrol1",7777)
+        self.osc_atlas = liblo.Address("mc-im-pc5",7777)
+        self.osc_alice = liblo.Address("mc-im-pc6",7777)
+        self.osc_cms = liblo.Address("mc-im-pc7",7777)
+        self.osc_lhcb = liblo.Address("mc-im-pc8",7777)
+        
 
     def checkCollision(self, b1x, b1y, other_dir):
         global g_atlas_col
@@ -246,21 +250,37 @@ class LHC(object):
                         g_atlas_col +=1 
                         g_last_collision = global_i
                         self.collisions.append([ATLAS, b1y, 100])
+                        try:
+                            liblo.send(self.osc_atlas, "/collision", ('i',1))
+                        except:
+                            print("could not send ATALS trigger")
                         return True
                     elif b1x in ALICEr and g_alice_col < 1 and timePassed:
                         g_alice_col +=1
                         g_last_collision = global_i
                         self.collisions.append([ALICE, b1y, 100])
+                        try:
+                            liblo.send(self.osc_alice, "/collision", ('i',1))
+                        except:
+                            print("could not send ALICE trigger")
                         return True
                     elif b1x in CMSr and g_cms_col < 1 and timePassed: 
                         g_cms_col +=1
                         g_last_collision = global_i
                         self.collisions.append([CMS, b1y, 100])
+                        try:
+                            liblo.send(self.osc_cms, "/collision", ('i',1))
+                        except:
+                            print("could not send CMS trigger")
                         return True
                     elif b1x in LHCbr and g_lhcb_col < 1 and timePassed:
                         g_lhcb_col +=1
                         g_last_collision = global_i
                         self.collisions.append([LHCb, b1y, 100])
+                        try:
+                            liblo.send(self.osc_lhcb, "/collision", ('i',1))
+                        except:
+                            print("could not send LHCb trigger")
                         return True
         return collision
 
@@ -464,7 +484,8 @@ class LHC(object):
                         (direction == CCW and self.checkCollision(bnch.x, bnch.y, CW)) ) :
                         print("collide", bnch.x, bnch.y)
                         #bnch.cycles += 1
-                        del_bunches.append(index)
+                        # no deletion of bunches as only very few partciles collide per turn
+                        #del_bunches.append(index)
                         #del_bunches.append(index-1)
                     else:
                         bnch.draw()    
@@ -524,10 +545,6 @@ class LHC(object):
         self.updateLHC(lhc_conf, lhc_pat_ccw, CCW)
         self.updateCollisions()
         if self.lhc_done:
-            try:
-                liblo.send(self.osc_target, "/collision", ('T',1))
-            except:
-                print("could not send OSC trigger")
             # reset
             print('LHC LED strip animation ended')
             self.graphics.fill(BLACK)
