@@ -7,8 +7,8 @@ mc = '2.44.97.50'
 
 TARGETS = {
     #mc : OldTron(),
-    mc : PixelScanner(),
-    #mc : LHC(),
+    #mc : PixelScanner(),
+    mc : LHC(),
     #mc : PlasmaSecond(),
     # 'lightpaper': Visualizer(),
     # 'lightpaper': RandomLife(),
@@ -38,8 +38,8 @@ TARGETS = {
     # local_host: DisplayPng(),
 
     # dest: PlasmaFirst(),
-    #local_host: PlasmaSecond(),
-    # michiel_laptop: PlasmaSecond(),
+    #local_host: PlasmaSecond(),#
+    # michiel_laptop: PlasmaSecod(),
     # local_host: PlasmaThird(),
 
     # local_host: RainPattern(chance=0.2),

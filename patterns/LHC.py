@@ -65,13 +65,13 @@ ALICE = 28 # - 27 + 1
 CMS = 90 #- 27 # + 1
 LHCb = 151 #- 27 #+ 1
 
-ATLASr = range(ATLAS-1,ATLAS+2)
-ALICEr = range(ALICE-1,ALICE+2)
-CMSr   = range(CMS-1,CMS+2)
-LHCbr  = range(LHCb-1,LHCb+2)
+ATLASr = range(ATLAS-3,ATLAS+3)
+ALICEr = range(ALICE-2,ALICE+3)
+CMSr   = range(CMS-2,CMS+2)
+LHCbr  = range(LHCb-2,LHCb+1)
 
-tf_conf_left  = [ 21, [3, [6 , 26]] ] 
-tf_conf_right = [ 9,  [4, [67, 75]] ]
+tf_conf_left  = [ 20, [3, [6 , 25]] ] #was 21 6 26
+tf_conf_right = [ 10,  [4, [67, 76]] ] #was 9 67 75
 
 global_i = 0
 
@@ -240,43 +240,43 @@ class LHC(object):
         global g_last_collision
 
         collision = False
-        if global_i > g_last_collision + 250:
-            timePassed = True  
-        else:
-            timePassed = False  
+        #if global_i > g_last_collision + 250:
+        timePassed = True  
+        #else:
+        #    timePassed = False  
         for b2 in self.lhc_bunches[other_dir]:
-                if b1x in range(b2.x-2,b2.x+2) and b1y == b2.y:
-                    if b1x in ATLASr and g_atlas_col < 1 and timePassed == True:
+                if b1x in range(b2.x-1,b2.x+1) and b1y == b2.y:
+                    if b1x in ATLASr and g_atlas_col < 10000 and timePassed:
                         g_atlas_col +=1 
                         g_last_collision = global_i
-                        self.collisions.append([ATLAS, b1y, 100])
+                        self.collisions.append([ATLAS, b1y, 30])
                         try:
                             liblo.send(self.osc_atlas, "/collision", ('i',1))
                         except:
                             print("could not send ATALS trigger")
                         return True
-                    elif b1x in ALICEr and g_alice_col < 1 and timePassed:
+                    if b1x in ALICEr and g_alice_col < 10000 and timePassed:
                         g_alice_col +=1
                         g_last_collision = global_i
-                        self.collisions.append([ALICE, b1y, 100])
+                        self.collisions.append([ALICE, b1y, 30])
                         try:
                             liblo.send(self.osc_alice, "/collision", ('i',1))
                         except:
                             print("could not send ALICE trigger")
                         return True
-                    elif b1x in CMSr and g_cms_col < 1 and timePassed: 
+                    if b1x in CMSr and g_cms_col < 100000 and timePassed: 
                         g_cms_col +=1
                         g_last_collision = global_i
-                        self.collisions.append([CMS, b1y, 100])
+                        self.collisions.append([CMS, b1y, 30])
                         try:
                             liblo.send(self.osc_cms, "/collision", ('i',1))
                         except:
                             print("could not send CMS trigger")
                         return True
-                    elif b1x in LHCbr and g_lhcb_col < 1 and timePassed:
+                    if b1x in LHCbr and g_lhcb_col < 100000 and timePassed:
                         g_lhcb_col +=1
                         g_last_collision = global_i
-                        self.collisions.append([LHCb, b1y, 100])
+                        self.collisions.append([LHCb, b1y, 30])
                         try:
                             liblo.send(self.osc_lhcb, "/collision", ('i',1))
                         except:
