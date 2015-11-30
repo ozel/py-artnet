@@ -221,6 +221,7 @@ class LHC(object):
         self.tfr_bunches = list()
         self.lhc_bunches = [[] for k in range(2)]
         self.collisions = list()
+        self.alice_colcnt = 0
 
 
         self.restart = True
@@ -256,14 +257,17 @@ class LHC(object):
                             print("could not send ATALS trigger")
                         return True
                     if b1x in ALICEr and g_alice_col < 10000 and timePassed:
-                        g_alice_col +=1
-                        g_last_collision = global_i
-                        self.collisions.append([ALICE, b1y, 30])
-                        try:
-                            liblo.send(self.osc_alice, "/collision", ('i',1))
-                        except:
-                            print("could not send ALICE trigger")
-                        return True
+                        self.alice_colcnt +=1
+                        # every third time only
+                        if self.alice_colcnt % 4 == 0:
+                            g_alice_col +=1
+                            g_last_collision = global_i
+                            self.collisions.append([ALICE, b1y, 30])
+                            try:
+                                liblo.send(self.osc_alice, "/collision", ('i',1))
+                            except:
+                                print("could not send ALICE trigger")
+                            return True
                     if b1x in CMSr and g_cms_col < 100000 and timePassed: 
                         g_cms_col +=1
                         g_last_collision = global_i
