@@ -68,7 +68,7 @@ LHCb = 151 #- 27 #+ 1
 ATLASr = range(ATLAS-3,ATLAS+3)
 ALICEr = range(ALICE-2,ALICE+3)
 CMSr   = range(CMS-2,CMS+2)
-LHCbr  = range(LHCb-2,LHCb+1)
+LHCbr  = range(LHCb-2,LHCb+2)
 
 tf_conf_left  = [ 20, [3, [6 , 25]] ] #was 21 6 26
 tf_conf_right = [ 10,  [4, [67, 76]] ] #was 9 67 75
