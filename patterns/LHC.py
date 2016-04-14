@@ -13,6 +13,8 @@ import liblo #for OSC messaging
 import random
 import numpy
 from operator import sub
+import time
+import datetime
 
 CW = 0
 CCW = 1
@@ -184,11 +186,7 @@ class Bunch():
 class LHC(object):
     def __init__(self):
         self.graphics = Graphics(matrix_width, matrix_height)
-        try:
-            self.serialPort = serial.Serial('/dev/cu.usbmodem1421',115200,timeout=None)
-        except:
-            print('serial port not valid')
-            self.serialPort = None
+        self.serialPort = None
         self.reset()
 
     def reset(self):
@@ -486,7 +484,8 @@ class LHC(object):
                     if self.lhc_pos > 1 * 2 * LHC_SIZE and \
                         ((direction == CW and self.checkCollision(bnch.x, bnch.y, CCW)) or \
                         (direction == CCW and self.checkCollision(bnch.x, bnch.y, CW)) ) :
-                        print("collide", bnch.x, bnch.y)
+                        if self.debug:
+                            print("collide", bnch.x, bnch.y)
                         #bnch.cycles += 1
                         # no deletion of bunches as only very few partciles collide per turn
                         #del_bunches.append(index)
@@ -529,13 +528,23 @@ class LHC(object):
             g_lhcb_col = 0
             g_last_collision = 0
             self.reset()
-            print("Touch the bottle...")
-            if self.serialPort:
-                self.serialPort.flushInput()
-                self.serialPort.read(1)
+            while self.serialPort == None:
+                try:
+                    print('-> trying to open serial port')
+                    self.serialPort = serial.Serial('/dev/cu.usbmodem1411',115200,timeout=None)
+                except:
+                    #print('serial port not valid')
+                    self.serialPort = None
+                    time.sleep(1)
+            print("-> Ready, touch the bottle...")
+            self.serialPort.flushInput()
+            self.serialPort.read(1)
+            self.serialPort.close()
+            self.serialPort = None
             #print("Press any key to continue...")
             #os.system('read -s -n 1')
             self.restart = False
+            print('{:%Y-%b-%d %H:%M:%S} -> starting LED strip animation'.format(datetime.datetime.now()))
         self.graphics.fill(BLACK)
         # self.bot_done = True
         # self.duo_done = True
@@ -550,7 +559,7 @@ class LHC(object):
         self.updateCollisions()
         if self.lhc_done:
             # reset
-            print('LHC LED strip animation ended')
+            print('-> LED strip animation ended')
             self.graphics.fill(BLACK)
             self.restart = True
         global_i += 1
